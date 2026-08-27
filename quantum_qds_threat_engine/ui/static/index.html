@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum-Inspired Cyber Threat Detection for QDS | Problem 26141</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top System Bar -->
+    <header class="top-nav">
+        <div class="brand-section">
+            <div class="quantum-logo-glow"></div>
+            <div>
+                <h1 class="brand-title">QUANTUM-DEFENSE <span class="badge-qds">QDS-26141</span></h1>
+                <p class="brand-sub">Quantum-Inspired Cyber Threat Detection for Digital Signature Security | Egreen Quanta</p>
+            </div>
+        </div>
+        <div class="system-status-pills">
+            <div class="status-pill"><span class="pill-dot green"></span> ENGINE: <strong id="engine-status">ONLINE</strong></div>
+            <div class="status-pill"><span class="pill-dot cyan"></span> SECURITY PARAMETER: <strong id="sec-param-n">N = 128 Qubits</strong></div>
+            <div class="status-pill"><span class="pill-dot purple"></span> METHOD: <strong class="text-neon-purple">STRICTLY NON-AI / QUANTUM-STATISTICAL</strong></div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="dashboard-grid">
+        <!-- Live Telemetry KPI Cards -->
+        <section class="telemetry-bar full-width">
+            <div class="kpi-card" id="card-chsh">
+                <div class="kpi-header">
+                    <span class="kpi-label">BELL-CHSH WITNESS (S)</span>
+                    <span class="kpi-sub">Max: 2.828 | Bound: 2.000</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-number" id="kpi-chsh-val">2.8284</span>
+                    <span class="kpi-tag tag-safe" id="kpi-chsh-status">MAXIMAL</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill progress-chsh" id="kpi-chsh-bar" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="card-qber-sig">
+                <div class="kpi-header">
+                    <span class="kpi-label">SIGNATURE QBER (e_sig)</span>
+                    <span class="kpi-sub">Threshold e_v: 8.0%</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-number" id="kpi-qber-sig-val">0.0%</span>
+                    <span class="kpi-tag tag-safe" id="kpi-qber-sig-status">PASS</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill progress-qber" id="kpi-qber-sig-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="card-qber-decoy">
+                <div class="kpi-header">
+                    <span class="kpi-label">PAULI DECOY QBER (e_decoy)</span>
+                    <span class="kpi-sub">Interception Monitor</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-number" id="kpi-qber-decoy-val">0.0%</span>
+                    <span class="kpi-tag tag-safe" id="kpi-qber-decoy-status">PRISTINE</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill progress-decoy" id="kpi-qber-decoy-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="card-forgery-bound">
+                <div class="kpi-header">
+                    <span class="kpi-label">INFO-THEORETIC SECURITY</span>
+                    <span class="kpi-sub">P_forge Bound: exp(-N·D_KL)</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-number" id="kpi-pforge-val">&le; 1.2e-13</span>
+                    <span class="kpi-tag tag-purple">UNCONDITIONAL</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill progress-sec" style="width: 100%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Left Column: Attack Sandbox & Controls -->
+        <section class="panel panel-controls">
+            <div class="panel-header">
+                <h2><span class="icon">&#9881;</span> QUANTUM ATTACK SIMULATION SANDBOX</h2>
+                <span class="panel-tag">Interactive Threat Injection</span>
+            </div>
+            <div class="panel-body">
+                <p class="panel-desc">Select an attack vector to evaluate non-AI quantum statistical detection in real time:</p>
+
+                <div class="attack-grid">
+                    <button class="btn-attack active-honest" data-type="honest">
+                        <span class="btn-icon">&#10004;</span>
+                        <div class="btn-text">
+                            <strong>Honest Baseline</strong>
+                            <small>Alice &rarr; Bob & Charlie (Pristine)</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="intercept_resend">
+                        <span class="btn-icon">&#9889;</span>
+                        <div class="btn-text">
+                            <strong>Intercept-Resend</strong>
+                            <small>Pauli Basis Collapse (~25% QBER)</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="cnot_probe">
+                        <span class="btn-icon">&#9775;</span>
+                        <div class="btn-text">
+                            <strong>CNOT Ancilla Probe</strong>
+                            <small>Entanglement Degradation (CHSH &lt; 2.8)</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="mitm">
+                        <span class="btn-icon">&#9760;</span>
+                        <div class="btn-text">
+                            <strong>Quantum MITM</strong>
+                            <small>Entanglement Broken (CHSH &le; 2.0)</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="existential_forgery">
+                        <span class="btn-icon">&#128273;</span>
+                        <div class="btn-text">
+                            <strong>Existential Forgery</strong>
+                            <small>Fake Payload (~50% Error Rate)</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="dishonest_bob">
+                        <span class="btn-icon">&#129309;</span>
+                        <div class="btn-text">
+                            <strong>Dishonest Receiver (Bob)</strong>
+                            <small>Repudiation / Framing Charlie</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="replay">
+                        <span class="btn-icon">&#10227;</span>
+                        <div class="btn-text">
+                            <strong>Replay Attack</strong>
+                            <small>Nonce & Bell Register Replay</small>
+                        </div>
+                    </button>
+
+                    <button class="btn-attack" data-type="channel_jamming">
+                        <span class="btn-icon">&#9729;</span>
+                        <div class="btn-text">
+                            <strong>Pauli Noise / Jamming</strong>
+                            <small>Coherent Phase/Bit Depolarization</small>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="param-config">
+                    <label>Simulated Transaction Payload:</label>
+                    <input type="text" id="input-message" value="GOVERNMENT_DEFENSE_CONTRACT_ORDER_#26141" class="cyber-input">
+                </div>
+
+                <div class="action-btn-row">
+                    <button id="btn-execute-simulation" class="btn-primary">
+                        <span class="pulse-ring"></span> INJECT &amp; RUN SIMULATION
+                    </button>
+                    <button id="btn-reset-cache" class="btn-secondary">RESET CACHE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Threat Detection Engine HUD -->
+        <section class="panel panel-threat-hud">
+            <div class="panel-header">
+                <h2><span class="icon">&#9877;</span> NON-AI THREAT DETECTION &amp; VERIFICATION ENGINE</h2>
+                <span class="badge-hud" id="hud-threat-badge">PRISTINE / ACCEPTED</span>
+            </div>
+            <div class="panel-body">
+                <div class="threat-alert-box alert-safe" id="threat-alert-box">
+                    <div class="alert-icon-col" id="alert-icon">&#10004;</div>
+                    <div class="alert-content-col">
+                        <h3 id="alert-title">AUTHENTIC SIGNATURE DETERMINISTICALLY ACCEPTED</h3>
+                        <p id="alert-summary">Signature passed all quantum verification checks; zero malicious disturbance detected.</p>
+                        <div class="mitigation-row">
+                            <strong>RECOMMENDED ACTION:</strong> <span id="alert-mitigation">Accept signature and execute transaction.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Non-AI Mathematical Rationale -->
+                <div class="math-proof-box">
+                    <div class="proof-header">&#128220; QUANTUM MATHEMATICAL DECISION CRITERIA</div>
+                    <div class="proof-grid">
+                        <div class="proof-item">
+                            <span class="proof-label">Statistical Hypothesis:</span>
+                            <span class="proof-val" id="proof-h0">H0: Normal Channel Noise &le; 3.0%</span>
+                        </div>
+                        <div class="proof-item">
+                            <span class="proof-label">Exact Binomial p-value:</span>
+                            <span class="proof-val text-neon-green" id="proof-pval">1.0000 (Safe)</span>
+                        </div>
+                        <div class="proof-item">
+                            <span class="proof-label">Hoeffding Bound P(e &ge; e_v):</span>
+                            <span class="proof-val text-neon-cyan" id="proof-hoeffding">&le; 2.4e-6</span>
+                        </div>
+                        <div class="proof-item">
+                            <span class="proof-label">KL-Divergence D_KL(e_v || e_d):</span>
+                            <span class="proof-val" id="proof-kldiv">0.2458 nats</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantum Teleportation Circuit Visualizer -->
+                <div class="teleport-circuit-box">
+                    <div class="circuit-header">QUANTUM TELEPORTATION PIPELINE TELEMETRY</div>
+                    <div class="circuit-pipeline">
+                        <div class="circuit-step">
+                            <div class="step-num">1. ENCODE</div>
+                            <div class="step-desc">Pauli Eigenstates <br><strong>{|0>,|1>,|+>,|->,|R>,|L>}</strong></div>
+                        </div>
+                        <div class="circuit-arrow">&rarr;</div>
+                        <div class="circuit-step">
+                            <div class="step-num">2. EPR PAIR</div>
+                            <div class="step-desc">Bell Entanglement <br><strong>|&Phi;+&gt; = (|00&gt;+|11&gt;)/&radic;2</strong></div>
+                        </div>
+                        <div class="circuit-arrow">&rarr;</div>
+                        <div class="circuit-step">
+                            <div class="step-num">3. BSM</div>
+                            <div class="step-desc">Alice Bell Measurement <br><strong>Classical (c1, c2)</strong></div>
+                        </div>
+                        <div class="circuit-arrow">&rarr;</div>
+                        <div class="circuit-step">
+                            <div class="step-num">4. CORRECTION</div>
+                            <div class="step-desc">Bob Pauli Unitary <br><strong>U = Z^c2 &middot; X^c1</strong></div>
+                        </div>
+                        <div class="circuit-arrow">&rarr;</div>
+                        <div class="circuit-step">
+                            <div class="step-num">5. PROJECT</div>
+                            <div class="step-desc">Projective Verification <br><strong>&Pi;_k = |k&gt;&lang;k|</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Section: Multi-Verifier Logs & Benchmark Analytics -->
+        <section class="panel full-width">
+            <div class="panel-header">
+                <h2><span class="icon">&#128202;</span> SYSTEM BENCHMARKING, ROC METRICS &amp; MULTI-VERIFIER ARBITRATION</h2>
+                <div class="tab-btn-row">
+                    <button class="tab-btn active" data-tab="tab-benchmarks">Performance Benchmarks</button>
+                    <button class="tab-btn" data-tab="tab-arbitration">Multi-Verifier Arbitration</button>
+                    <button class="tab-btn" data-tab="tab-deliverables">Delivery Table</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <!-- Tab 1: Benchmarks -->
+                <div class="tab-pane active" id="tab-benchmarks">
+                    <div class="benchmark-grid">
+                        <div class="bench-chart-card">
+                            <h3>Quantum Threat Detection Rate Across All 7 Attack Vectors</h3>
+                            <div class="chart-container">
+                                <img src="/benchmark_images/attack_detection_radar.png" alt="Threat Radar & ROC" class="responsive-chart" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                        <div class="bench-chart-card">
+                            <h3>Information-Theoretic Security Scaling vs Security Parameter N</h3>
+                            <div class="chart-container">
+                                <img src="/benchmark_images/security_scaling_curves.png" alt="Security Curves" class="responsive-chart" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Arbitration -->
+                <div class="tab-pane" id="tab-arbitration">
+                    <div class="arbitration-table-container">
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>Participant</th>
+                                    <th>Role</th>
+                                    <th>Verification QBER</th>
+                                    <th>Decoy QBER</th>
+                                    <th>Decision Status</th>
+                                    <th>Non-Repudiation Check</th>
+                                </tr>
+                            </thead>
+                            <tbody id="arbitration-table-body">
+                                <tr>
+                                    <td><strong>Alice</strong></td>
+                                    <td>Signer</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td><span class="tag-safe">TRANSMITTED</span></td>
+                                    <td>Private Key Bound</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bob</strong></td>
+                                    <td>Primary Verifier</td>
+                                    <td id="arb-bob-qber">0.0%</td>
+                                    <td id="arb-bob-decoy">0.0%</td>
+                                    <td><span class="tag-safe" id="arb-bob-status">ACCEPTED</span></td>
+                                    <td>Consistent</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Charlie</strong></td>
+                                    <td>Independent Auditor</td>
+                                    <td id="arb-charlie-qber">0.0%</td>
+                                    <td id="arb-charlie-decoy">0.0%</td>
+                                    <td><span class="tag-safe" id="arb-charlie-status">ACCEPTED</span></td>
+                                    <td>Consistent</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Deliverables Table -->
+                <div class="tab-pane" id="tab-deliverables">
+                    <div class="arbitration-table-container">
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Deliverable Item</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>DEL-01</strong></td>
+                                    <td>Quantum Teleportation &amp; QDS Protocol Engine</td>
+                                    <td>Bell states (|&Phi;+&gt;), BSM measurements, Pauli corrections (I, X, Y, Z), projective verification.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-02</strong></td>
+                                    <td>Non-AI Threat Detection Engine</td>
+                                    <td>Pauli eigenstate disturbance, QBER decomposition, Hoeffding/Binomial bounds, CHSH witness.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-03</strong></td>
+                                    <td>7-Vector Attack Simulator</td>
+                                    <td>Intercept-Resend, CNOT Probe, MITM, Forgery, Repudiation, Replay, Coherent Jamming.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-04</strong></td>
+                                    <td>Mathematical Security Proofs</td>
+                                    <td>Formal information-theoretic security bounds (P_forge &le; exp(-N&middot;D_KL)), error threshold proofs.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-05</strong></td>
+                                    <td>Monte Carlo Benchmarking Suite</td>
+                                    <td>Automated ROC generation, latency metrics (&lt;10ms), parameter sensitivity sweeps.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-06</strong></td>
+                                    <td>Interactive Command Center UI &amp; CLI</td>
+                                    <td>Responsive Cyber-Quantum Dashboard, REST API, real-time telemetry, and CLI runner.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DEL-07</strong></td>
+                                    <td>Automated Test Suite</td>
+                                    <td>Comprehensive pytest-compatible test suite verifying quantum transformations and guarantees.</td>
+                                    <td><span class="tag-safe">COMPLETE (100%)</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Egreen Quanta &middot; Quantum-Inspired Cyber Threat Detection for Digital Signature Security (ID: 26141) &middot; Information-Theoretic Security</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
