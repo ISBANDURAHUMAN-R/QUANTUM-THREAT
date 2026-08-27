@@ -1,0 +1,16 @@
+{
+  "security_parameter_N": 128,
+  "iterations_per_attack": 50,
+  "honest_acceptance_rate": 1.0,
+  "honest_false_alarm_rate": 0.0,
+  "mean_execution_latency_ms": 169.61496199957764,
+  "attack_detection_rates": {
+    "Intercept_Resend": 1.0,
+    "CNOT_Probe": 1.0,
+    "Quantum_MITM": 1.0,
+    "Existential_Forgery": 1.0,
+    "Dishonest_Bob_Forgery": 1.0,
+    "Replay_Attack": 1.0,
+    "Channel_Jamming": 1.0
+  }
+}
