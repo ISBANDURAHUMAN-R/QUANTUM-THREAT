@@ -1,261 +1,318 @@
-// Quantum-Inspired Cyber Threat Detection UI Engine (Problem 26141)
+// AEGIS-QDS Cyber Defense Terminal Controller (Problem 26141)
 
 let currentSelectedAttack = 'honest';
 
 document.addEventListener('DOMContentLoaded', () => {
-    initAttackButtons();
-    initTabNavigation();
-    initActionButtons();
+    initCrimsonParticleCanvas();
+    startClock();
+    initAttackSelection();
     loadSystemStatus();
-    loadBenchmarkImages();
 });
 
-function initAttackButtons() {
-    const buttons = document.querySelectorAll('.btn-attack');
+// 1. Crimson Matrix Particle Animation Canvas
+function initCrimsonParticleCanvas() {
+    const canvas = document.getElementById('quantum-bg-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const count = 40;
+    const glyphs = ['|0\u27E9', '|1\u27E9', '|+\u27E9', '|-\u27E9', '|\u03A6+\u27E9', '|\u03A8+\u27E9', '\u03C3_z', '\u03C3_x', '0x1F', '0x7A'];
+
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.35,
+            vy: (Math.random() - 0.5) * 0.35,
+            glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+            size: 10 + Math.random() * 5,
+            opacity: 0.12 + Math.random() * 0.2,
+            color: Math.random() > 0.3 ? '#ff003c' : '#ffffff'
+        });
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw laser connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(255, 0, 60, ${0.08 * (1 - dist / 130)})`;
+                    ctx.lineWidth = 0.7;
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw glyphs
+        for (const p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+
+            ctx.font = `${p.size}px 'JetBrains Mono', monospace`;
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.opacity;
+            ctx.fillText(p.glyph, p.x, p.y);
+        }
+        ctx.globalAlpha = 1.0;
+
+        requestAnimationFrame(render);
+    }
+    render();
+}
+
+// 2. Real-time Clock
+function startClock() {
+    const el = document.getElementById('live-clock');
+    setInterval(() => {
+        const now = new Date();
+        if (el) el.innerText = now.toUTCString().split(' ')[4] + ' UTC';
+    }, 1000);
+}
+
+// 3. Selection
+function initAttackSelection() {
+    const buttons = document.querySelectorAll('.attack-btn');
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            buttons.forEach(b => b.classList.remove('active-selected'));
-            btn.classList.add('active-selected');
-            currentSelectedAttack = btn.getAttribute('data-type');
+            buttons.forEach(b => b.classList.remove('active-attack'));
+            btn.classList.add('active-attack');
+            currentSelectedAttack = btn.getAttribute('data-attack');
         });
     });
 }
 
-function initTabNavigation() {
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const panes = document.querySelectorAll('.tab-pane');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-tab');
-            tabBtns.forEach(b => b.classList.remove('active'));
-            panes.forEach(p => p.classList.remove('active'));
-            
-            btn.classList.add('active');
-            const targetPane = document.getElementById(targetId);
-            if (targetPane) {
-                targetPane.classList.add('active');
-            }
-        });
+function selectAttack(type) {
+    currentSelectedAttack = type;
+    const buttons = document.querySelectorAll('.attack-btn');
+    buttons.forEach(btn => {
+        if (btn.getAttribute('data-attack') === type) {
+            btn.classList.add('active-attack');
+        } else {
+            btn.classList.remove('active-attack');
+        }
     });
-}
-
-function initActionButtons() {
-    const runBtn = document.getElementById('btn-execute-simulation');
-    const resetBtn = document.getElementById('btn-reset-cache');
-    const msgInput = document.getElementById('input-message');
-    
-    if (runBtn) {
-        runBtn.addEventListener('click', () => {
-            const msg = msgInput ? msgInput.value : "DEFAULT_TRANSACTION_PAYLOAD";
-            executeSimulation(currentSelectedAttack, msg);
-        });
-    }
-    
-    if (resetBtn) {
-        resetBtn.addEventListener('click', async () => {
-            try {
-                const res = await fetch('/api/reset', { method: 'POST' });
-                const data = await res.json();
-                alert("Quantum session cache & nonces reset successfully.");
-            } catch (err) {
-                console.error("Reset error:", err);
-            }
-        });
-    }
+    executeCurrentSimulation();
 }
 
 async function loadSystemStatus() {
     try {
-        const res = await fetch('/api/status');
-        const data = await res.json();
-        if (data.status === "ONLINE") {
-            const el = document.getElementById('sec-param-n');
-            if (el) el.innerText = `N = ${data.security_parameter_N} Qubits`;
-        }
-    } catch (err) {
-        console.warn("Status fetch failed:", err);
+        await fetch('/api/status');
+    } catch (e) {
+        console.warn("Status error:", e);
     }
 }
 
-async function loadBenchmarkImages() {
-    try {
-        await fetch('/api/benchmark');
-    } catch (err) {
-        console.warn("Benchmark data fetch:", err);
-    }
-}
+// 4. Run Simulation
+async function executeCurrentSimulation() {
+    const runBtn = document.getElementById('btn-run-sim');
+    const msgInput = document.getElementById('input-message');
+    const msg = msgInput ? msgInput.value : "DEFAULT_TRANSACTION";
 
-async function executeSimulation(attackType, message) {
-    const runBtn = document.getElementById('btn-execute-simulation');
     if (runBtn) {
         runBtn.disabled = true;
-        runBtn.innerHTML = '<span class="pulse-ring"></span> SIMULATING QUANTUM CHANNELS...';
+        runBtn.innerHTML = '<span class="blink-dot"></span> SIMULATING QUANTUM CHANNELS...';
     }
-    
+
     try {
         const res = await fetch('/api/simulate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                attack_type: attackType,
-                message: message
+                attack_type: currentSelectedAttack,
+                message: msg
             })
         });
-        
+
         const data = await res.json();
         if (data.status === "SUCCESS") {
-            updateDashboardTelemetry(data.result);
+            renderTelemetry(data.result);
         }
     } catch (err) {
         console.error("Simulation error:", err);
     } finally {
         if (runBtn) {
             runBtn.disabled = false;
-            runBtn.innerHTML = '<span class="pulse-ring"></span> INJECT &amp; RUN SIMULATION';
+            runBtn.innerHTML = '<span>&#9654; EXECUTE QUANTUM VERIFICATION</span>';
         }
     }
 }
 
-function updateDashboardTelemetry(result) {
+// 5. Render HUD Updates
+function renderTelemetry(result) {
     const report = result.threat_report || {};
     const metrics = report.metrics || {};
-    const threatDetected = report.threat_detected;
-    
-    // 1. KPI Cards
+    const isThreat = report.threat_detected;
+
     // CHSH
     const chshMetrics = metrics.chsh_metrics || {};
     const meanChsh = chshMetrics.mean_chsh_s !== undefined ? chshMetrics.mean_chsh_s : 2.8284;
-    const chshEl = document.getElementById('kpi-chsh-val');
-    const chshTag = document.getElementById('kpi-chsh-status');
-    const chshBar = document.getElementById('kpi-chsh-bar');
-    
+    const chshEl = document.getElementById('val-chsh');
+    const chshBadge = document.getElementById('badge-chsh');
+    const chshBar = document.getElementById('bar-chsh');
+
     if (chshEl) chshEl.innerText = meanChsh.toFixed(4);
-    if (chshTag) {
+    if (chshBadge) {
         if (meanChsh >= 2.70) {
-            chshTag.className = "kpi-tag tag-safe";
-            chshTag.innerText = "MAXIMAL";
+            chshBadge.className = "badge-status status-safe";
+            chshBadge.innerText = "MAXIMAL";
         } else if (meanChsh > 2.0) {
-            chshTag.className = "kpi-tag tag-warn";
-            chshTag.innerText = "DEGRADED";
+            chshBadge.className = "badge-status status-stealth";
+            chshBadge.innerText = "PROBED";
         } else {
-            chshTag.className = "kpi-tag tag-danger";
-            chshTag.innerText = "SEPARABLE";
+            chshBadge.className = "badge-status status-danger";
+            chshBadge.innerText = "SEPARABLE";
         }
     }
     if (chshBar) {
         const pct = Math.min(Math.max((meanChsh / 2.8284) * 100, 0), 100);
         chshBar.style.width = `${pct}%`;
     }
-    
-    // QBER Signature
+
+    // Payload QBER
     const sigQber = metrics.sig_qber !== undefined ? metrics.sig_qber : 0.0;
-    const sigQberEl = document.getElementById('kpi-qber-sig-val');
-    const sigQberTag = document.getElementById('kpi-qber-sig-status');
-    const sigQberBar = document.getElementById('kpi-qber-sig-bar');
-    
+    const sigQberEl = document.getElementById('val-qber');
+    const sigQberBadge = document.getElementById('badge-qber');
+    const sigQberBar = document.getElementById('bar-qber');
+
     if (sigQberEl) sigQberEl.innerText = `${(sigQber * 100).toFixed(1)}%`;
-    if (sigQberTag) {
+    if (sigQberBadge) {
         if (sigQber <= 0.08) {
-            sigQberTag.className = "kpi-tag tag-safe";
-            sigQberTag.innerText = "PASS";
+            sigQberBadge.className = "badge-status status-safe";
+            sigQberBadge.innerText = "PASS";
         } else {
-            sigQberTag.className = "kpi-tag tag-danger";
-            sigQberTag.innerText = "ALARM";
+            sigQberBadge.className = "badge-status status-danger";
+            sigQberBadge.innerText = "ALARM";
         }
     }
     if (sigQberBar) {
         sigQberBar.style.width = `${Math.min(sigQber * 200, 100)}%`;
     }
-    
-    // QBER Decoy
+
+    // Decoy QBER
     const decoyQber = metrics.decoy_qber !== undefined ? metrics.decoy_qber : 0.0;
-    const decoyQberEl = document.getElementById('kpi-qber-decoy-val');
-    const decoyQberTag = document.getElementById('kpi-qber-decoy-status');
-    const decoyQberBar = document.getElementById('kpi-qber-decoy-bar');
-    
+    const decoyQberEl = document.getElementById('val-decoy');
+    const decoyQberBadge = document.getElementById('badge-decoy');
+    const decoyQberBar = document.getElementById('bar-decoy');
+
     if (decoyQberEl) decoyQberEl.innerText = `${(decoyQber * 100).toFixed(1)}%`;
-    if (decoyQberTag) {
+    if (decoyQberBadge) {
         if (decoyQber <= 0.08) {
-            decoyQberTag.className = "kpi-tag tag-safe";
-            decoyQberTag.innerText = "PRISTINE";
+            decoyQberBadge.className = "badge-status status-safe";
+            decoyQberBadge.innerText = "PRISTINE";
         } else {
-            decoyQberTag.className = "kpi-tag tag-danger";
-            decoyQberTag.innerText = "COLLAPSED";
+            decoyQberBadge.className = "badge-status status-danger";
+            decoyQberBadge.innerText = "COLLAPSED";
         }
     }
     if (decoyQberBar) {
         decoyQberBar.style.width = `${Math.min(decoyQber * 200, 100)}%`;
     }
-    
-    // 2. Threat HUD Box
-    const hudBadge = document.getElementById('hud-threat-badge');
+
+    // Threat Alert Banner
+    const masterBadge = document.getElementById('badge-master-threat');
     const alertBox = document.getElementById('threat-alert-box');
     const alertIcon = document.getElementById('alert-icon');
     const alertTitle = document.getElementById('alert-title');
-    const alertSummary = document.getElementById('alert-summary');
-    const alertMitigation = document.getElementById('alert-mitigation');
-    
-    if (threatDetected) {
-        if (hudBadge) {
-            hudBadge.className = "badge-hud tag-danger";
-            hudBadge.innerText = report.threat_classification || "THREAT DETECTED";
+    const alertDesc = document.getElementById('alert-desc');
+    const alertMit = document.getElementById('alert-mitigation');
+    const alertConf = document.getElementById('alert-conf');
+
+    if (isThreat) {
+        if (masterBadge) {
+            masterBadge.className = "badge-status status-danger";
+            masterBadge.innerText = report.threat_classification || "THREAT DETECTED";
         }
-        if (alertBox) {
-            alertBox.className = "threat-alert-box alert-danger";
-        }
+        if (alertBox) alertBox.className = "threat-banner banner-danger";
         if (alertIcon) alertIcon.innerHTML = "&#9888;";
         if (alertTitle) alertTitle.innerText = `ATTACK IDENTIFIED: ${report.threat_classification || "MALICIOUS INTRUSION"}`;
     } else {
-        if (hudBadge) {
-            hudBadge.className = "badge-hud tag-safe";
-            hudBadge.innerText = "PRISTINE / ACCEPTED";
+        if (masterBadge) {
+            masterBadge.className = "badge-status status-safe";
+            masterBadge.innerText = "PRISTINE // ACCEPTED";
         }
-        if (alertBox) {
-            alertBox.className = "threat-alert-box alert-safe";
-        }
-        if (alertIcon) alertIcon.innerHTML = "&#10004;";
+        if (alertBox) alertBox.className = "threat-banner banner-safe";
+        if (alertIcon) alertIcon.innerHTML = "&check;";
         if (alertTitle) alertTitle.innerText = "AUTHENTIC SIGNATURE DETERMINISTICALLY ACCEPTED";
     }
-    
-    if (alertSummary) alertSummary.innerText = report.summary || "No description.";
-    if (alertMitigation) alertMitigation.innerText = report.mitigation_action || "None.";
-    
-    // 3. Mathematical Decision Proofs
+
+    if (alertDesc) alertDesc.innerText = report.summary || "No anomalies detected.";
+    if (alertMit) alertMit.innerText = report.mitigation_action || "None.";
+    if (alertConf) alertConf.innerText = `CONFIDENCE: ${(report.confidence_score || 99.9).toFixed(1)}%`;
+
+    // Mathematical Proofs
     const decoyAnalysis = metrics.decoy_analysis || {};
     const sigStat = decoyAnalysis.sig_stat || {};
-    const secBounds = metrics.security_bounds || {};
-    
-    const pval = sigStat.p_value !== undefined ? sigStat.p_value : (threatDetected ? 0.00001 : 1.0);
-    const hoeff = sigStat.hoeffding_bound !== undefined ? sigStat.hoeffding_bound : 1e-6;
-    const kldiv = secBounds.kl_divergence !== undefined ? secBounds.kl_divergence : 0.2458;
-    
+    const pval = sigStat.p_value !== undefined ? sigStat.p_value : (isThreat ? 1.4e-11 : 1.0);
+    const hoeff = sigStat.hoeffding_bound !== undefined ? sigStat.hoeffding_bound : 2.4e-6;
+
     const pvalEl = document.getElementById('proof-pval');
     const hoeffEl = document.getElementById('proof-hoeffding');
-    const kldivEl = document.getElementById('proof-kldiv');
-    
-    if (pvalEl) pvalEl.innerText = pval < 0.001 ? `${pval.toExponential(2)} (REJECT H0)` : `${pval.toFixed(4)} (ACCEPT H0)`;
+    if (pvalEl) pvalEl.innerText = pval < 0.001 ? `${pval.toExponential(2)} (REJECT H0)` : `${pval.toFixed(4)} (Safe)`;
     if (hoeffEl) hoeffEl.innerText = `\u2264 ${hoeff.toExponential(2)}`;
-    if (kldivEl) kldivEl.innerText = `${kldiv.toFixed(4)} nats`;
-    
-    // 4. Multi-verifier Arbitration Table
+
+    // Arbitration
     const arb = metrics.arbitration_result;
     const bobQberEl = document.getElementById('arb-bob-qber');
     const charlieQberEl = document.getElementById('arb-charlie-qber');
     const bobStatus = document.getElementById('arb-bob-status');
     const charlieStatus = document.getElementById('arb-charlie-status');
-    
+
     if (bobQberEl) bobQberEl.innerText = `${(sigQber * 100).toFixed(1)}%`;
     if (bobStatus) {
-        bobStatus.className = sigQber <= 0.08 ? "tag-safe" : "tag-danger";
+        bobStatus.className = sigQber <= 0.08 ? "badge-status status-safe" : "badge-status status-danger";
         bobStatus.innerText = sigQber <= 0.08 ? "ACCEPTED" : "REJECTED";
     }
-    
+
     if (arb && charlieQberEl) {
         charlieQberEl.innerText = `${(arb.charlie_qber * 100).toFixed(1)}%`;
         if (charlieStatus) {
-            charlieStatus.className = arb.charlie_qber <= 0.08 ? "tag-safe" : "tag-danger";
+            charlieStatus.className = arb.charlie_qber <= 0.08 ? "badge-status status-safe" : "badge-status status-danger";
             charlieStatus.innerText = arb.charlie_qber <= 0.08 ? "ACCEPTED" : "REJECTED";
         }
+    }
+}
+
+// 6. Tabs
+function switchTab(tabId, btn) {
+    const tabs = document.querySelectorAll('.tab-view');
+    const buttons = document.querySelectorAll('.tab-btn');
+
+    tabs.forEach(t => t.classList.remove('active'));
+    buttons.forEach(b => b.classList.remove('active'));
+
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+    if (btn) btn.classList.add('active');
+}
+
+async function resetSystemState() {
+    try {
+        await fetch('/api/reset', { method: 'POST' });
+        alert("Quantum state memory & nonces cleared.");
+    } catch (e) {
+        console.error("Reset failed:", e);
     }
 }
