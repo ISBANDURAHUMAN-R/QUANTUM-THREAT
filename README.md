@@ -1,7 +1,7 @@
 # Quantum-Inspired Cyber Threat Detection for Digital Signature Security (ID: 26141)
 
 **Organization / Department**: Egreen Quanta  
-**Category**: Software | **Theme**: Blockchain & Cybersecurity  
+**Category**: Software | **Theme**: Blockchain & Cybersecurity.  
 **Design Principle**: Strictly Non-AI / Non-ML Information-Theoretic Threat Defense.
 
 ---
