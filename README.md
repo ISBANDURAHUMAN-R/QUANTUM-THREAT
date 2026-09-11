@@ -2,7 +2,7 @@
 
 **Organization / Department**: Egreen Quanta  
 **Category**: Software | **Theme**: Blockchain & Cybersecurity  
-**Design Principle**: Strictly Non-AI / Non-ML Information-Theoretic Threat Defense
+**Design Principle**: Strictly Non-AI / Non-ML Information-Theoretic Threat Defense.
 
 ---
 
