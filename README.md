@@ -95,7 +95,7 @@ quantum_qds_threat_engine/
 ├── docs/
 │   ├── mathematical_formulation.md # Full mathematical derivations & security proofs
 │   └── delivery_table.md         # Deliverables table matching problem statement
-├── demo.pu
+├── demo.py
 ├── run_tests.py                  # Automated test runner
 └── run_simulation.py             # Master benchmark & dashboard runner
 ├── README.md

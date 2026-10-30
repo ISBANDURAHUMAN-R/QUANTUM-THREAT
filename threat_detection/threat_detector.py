@@ -104,6 +104,12 @@ class QuantumThreatDetector:
                 "dispute_threshold": self.ed
             }
 
+        # Compute combined QBER across all transmitted channel qubits
+        tot_sig = res_bob.total_signature_qubits
+        tot_dec = res_bob.total_decoy_qubits
+        total_channel_qubits = tot_sig + tot_dec
+        combined_qber = (sig_qber * tot_sig + decoy_qber * tot_dec) / total_channel_qubits if total_channel_qubits > 0 else sig_qber
+
         # Rule Tree - Layer by Layer:
         # Layer 2: Entanglement Health on Physical Bell Channel
         if mean_chsh <= 2.0:
@@ -123,7 +129,8 @@ class QuantumThreatDetector:
             mitigation = "Purge compromised Bell pairs. Re-run privacy amplification."
             
         # Layer 3: Active Quantum Interception in Transit (Decoy State Collapse)
-        elif decoy_qber > self.ev and sig_qber <= 0.40:
+        # Expected Intercept-Resend error is ~33.3%; Bayesian threshold between 33.3% and 50.0% blind guessing is 41.7%
+        elif decoy_qber > self.ev and combined_qber <= 0.42:
             threat_detected = True
             threat_classification = "INTERCEPT_RESEND_EAVESDROPPING"
             confidence_score = decoy_analysis["decoy_stat"]["confidence_percentage"]
@@ -140,7 +147,7 @@ class QuantumThreatDetector:
             summary = f"Signature payload forgery detected: Payload QBER={sig_qber*100:.1f}% exceeds threshold {self.ev*100:.1f}%, while decoy channel remained unperturbed."
             mitigation = "Reject signature. Attacker attempted existential/chosen-message forgery without private key."
             
-        elif sig_qber > 0.40 and decoy_qber > 0.40:
+        elif combined_qber > 0.42 or (sig_qber > 0.40 and decoy_qber > 0.40):
             threat_detected = True
             threat_classification = "EXISTENTIAL_SIGNATURE_FORGERY"
             confidence_score = 99.9
