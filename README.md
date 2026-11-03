@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="QUANTUM-THREAT Banner" width="100%">
+</p>
+
 # Quantum-Inspired Cyber Threat Detection for Digital Signature Security (ID: 26141)
 
 **Organization / Department**: Egreen Quanta  
